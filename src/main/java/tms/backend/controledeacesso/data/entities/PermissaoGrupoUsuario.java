@@ -21,8 +21,9 @@ public class PermissaoGrupoUsuario {
     @EmbeddedId
     private PermissaoGrupoUsuarioPk id;
 
+    @Data
     @Embeddable
-    public class PermissaoGrupoUsuarioPk implements Serializable {
+    public static class PermissaoGrupoUsuarioPk implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
@@ -32,6 +33,5 @@ public class PermissaoGrupoUsuario {
         @ManyToOne(optional = false, fetch = FetchType.LAZY)
         @JoinColumn(name = "id_usuario", nullable = false)
         private Usuario usuario;
-
     }
 }

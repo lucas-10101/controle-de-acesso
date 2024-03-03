@@ -19,8 +19,9 @@ public class GrupoUsuario {
     @EmbeddedId
     private GrupoUsuarioPk id;
 
+    @Data
     @Embeddable
-    public class GrupoUsuarioPk implements Serializable {
+    public static class GrupoUsuarioPk implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
@@ -31,6 +32,5 @@ public class GrupoUsuario {
         @ManyToOne(optional = false, fetch = FetchType.LAZY)
         @JoinColumn(name = "id_usuario", nullable = false)
         private Usuario usuario;
-
     }
 }

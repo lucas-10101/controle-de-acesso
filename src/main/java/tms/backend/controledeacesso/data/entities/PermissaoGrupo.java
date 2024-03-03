@@ -19,8 +19,9 @@ public class PermissaoGrupo {
     @EmbeddedId
     private PermissaoGrupoPk id;
 
+    @Data
     @Embeddable
-    public class PermissaoGrupoPk implements Serializable {
+    public static class PermissaoGrupoPk implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
