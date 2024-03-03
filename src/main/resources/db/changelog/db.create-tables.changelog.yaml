@@ -1,0 +1,572 @@
+# yaml-language-server: $schema=https://json.schemastore.org/liquibase-3.2.json
+
+databaseChangeLog:
+  
+  - changeSet:
+      id: db-start
+      author: lucas-10101
+      changes:
+        - tagDatabase:
+            tag: 'db-start'
+
+  - changeSet:
+      id: create-locatarios-table
+      author: lucas-10101
+
+      preConditions:
+        - not:
+            - tableExists:
+                tableName: locatarios
+
+      changes:
+        - createTable:
+            tableName: locatarios
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  startWith: 0
+                  incrementBy: 1
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_locatarios
+              - column:
+                  name: nome
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: un_nome_locatarios
+              - column:
+                  name: dominio
+                  type: varchar(254)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: un_dominio_locatarios
+              - column:
+                  name: esquema_sgbd
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: un_esquema_sgdb_locatarios
+      
+      rollback: 
+        - dropTable:
+            tableName: locatarios
+
+  - changeSet:
+      id: create-usuarios-table
+      author: lucas-10101
+
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-locatarios-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - not:
+                - tableExists:
+                    tableName: usuarios
+
+      changes:
+        - createTable:
+            tableName: usuarios
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  startWith: 0
+                  incrementBy: 1
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_usuarios
+              - column:
+                  name: email
+                  type: varchar(320)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: un_email_usuarios
+              - column:
+                  name: id_locatario
+                  type: int
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: locatarios
+                    foreignKeyName: fk_locatarios_usuarios
+                    uniqueConstraintName: un_id_locatario_usuarios
+                          
+      rollback: 
+        - dropTable:
+            tableName: usuarios
+
+  - changeSet:
+      id: create-grupos-table
+      author: lucas-10101
+
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-locatarios-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - not:
+                - tableExists:
+                    tableName: grupos
+
+      changes:
+        - createTable:
+            tableName: grupos
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  startWith: 0
+                  incrementBy: 1
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_grupos
+              - column:
+                  name: nome
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: id_locatario
+                  type: int
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: locatarios
+                    foreignKeyName: fk_locatarios_grupos
+      
+      rollback: 
+        - dropTable:
+            tableName: grupos
+                    
+  - changeSet:
+      id: create-grupos-table-constraints
+      author: lucas-10101
+      
+      preConditions:
+        - changeSetExecuted:
+            id: create-grupos-table
+            author: lucas-10101
+            changeLogFile: db/changelog/db.create-tables.changelog.yaml
+        
+      changes:
+        - addUniqueConstraint:
+            tableName: grupos
+            columnNames: nome, id_locatario
+            constraintName: un_nome_id_locatario
+      
+      rollback: 
+        - dropUniqueConstraint:
+            tableName: grupos
+            constraintName: un_nome_id_locatario
+            
+  - changeSet:
+      id: create-permissoes-table
+      author: lucas-10101
+
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: db-start
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - not:
+                - tableExists:
+                    tableName: permissoes
+
+      changes:
+        - createTable:
+            tableName: permissoes
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  startWith: 0
+                  incrementBy: 1
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_permissoes
+              - column:
+                  name: nome
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: un_nome_permissoes
+      
+      rollback: 
+        - dropTable:
+            tableName: permissoes
+
+  - changeSet:
+      id: create-grupo_usuario-table
+      author: lucas-10101
+
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-usuarios-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - changeSetExecuted:
+                id: create-grupos-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - not:
+                - tableExists:
+                    tableName: grupo_usuario
+      changes:
+        - createTable:
+            tableName: grupo_usuario
+            columns:
+              - column:
+                  name: id_grupo
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: grupos
+                    foreignKeyName: fk_grupo_usuario_grupos
+              - column:
+                  name: id_usuario
+                  type: int
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: usuarios
+                    foreignKeyName: fk_grupo_usuario_usuarios
+                          
+      rollback: 
+        - dropTable:
+            tableName: grupo_usuario
+                    
+  - changeSet:
+      id: create-grupo_usuario-table-constraints
+      author: lucas-10101
+      
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-grupo_usuario-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - tableExists:
+                tableName: grupo_usuario
+            - not:
+                - primaryKeyExists:
+                    tableName: grupo_usuario
+                    primaryKeyName: pk_grupo_usuario
+      changes:
+        - addPrimaryKey:
+            tableName: grupo_usuario
+            columnNames: id_grupo, id_usuario
+            constraintName: pk_grupo_usuario
+      
+      rollback: 
+        - dropPrimaryKey:
+            tableName: locatarios
+            constraintName: pk_grupo_usuario
+         
+  - changeSet:
+      id: create-permissao_grupo-table
+      author: lucas-10101
+      
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-grupos-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - changeSetExecuted:
+                id: create-permissoes-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - not:
+                - tableExists:
+                    tableName: permissao_grupo
+      changes:
+        - createTable:
+            tableName: permissao_grupo
+            columns:
+              - column:
+                  name: id_permissao
+                  type: int
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: permissoes
+                    foreignKeyName: fk_permissao_grupo_permissoes
+              - column:
+                  name: id_grupo
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: grupos
+                    foreignKeyName: fk_permissao_grupo_grupos
+      
+      rollback: 
+        - dropTable:
+            tableName: permissao_grupo
+                    
+  - changeSet:
+      id: create-permissao_grupo-table-constraints
+      author: lucas-10101
+      
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-permissao_grupo-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - tableExists:
+                tableName: permissao_grupo
+            - not:
+                - primaryKeyExists:
+                    tableName: permissao_grupo
+                    primaryKeyName: pk_permissao_grupo
+      
+      changes:
+        - addPrimaryKey:
+            tableName: permissao_grupo
+            columnNames: id_permissao, id_grupo
+            constraintName: pk_permissao_grupo
+      
+      rollback: 
+        - dropPrimaryKey:
+            tableName: permissao_grupo
+            constraintName: pk_permissao_grupo
+                    
+  - changeSet:
+      id: create-permissao_grupo_usuario-table
+      author: lucas-10101
+      
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-permissao_grupo-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - changeSetExecuted:
+                id: create-usuarios-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - not:
+                - tableExists:
+                    tableName: permissao_grupo_usuario
+      changes:
+        - createTable:
+            tableName: permissao_grupo_usuario
+            columns:
+              - column:
+                  name: id_permissao
+                  type: int
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: permissoes
+                    foreignKeyName: fk_permissao_grupo_usuario_permissoes
+              - column:
+                  name: id_grupo
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: grupos
+                    foreignKeyName: fk_permissao_grupo_usuario_grupos
+              - column:
+                  name: id_usuario
+                  type: int
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: usuarios
+                    foreignKeyName: fk_permissao_grupo_usuario_usuarios
+      
+      rollback: 
+        - dropTable:
+            tableName: permissao_grupo_usuario
+                    
+  - changeSet:
+      id: create-permissao_grupo_usuario-table-constraints
+      author: lucas-10101
+      
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-permissao_grupo_usuario-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - tableExists:
+                tableName: permissao_grupo_usuario
+            - not:
+                - primaryKeyExists:
+                    tableName: permissao_grupo_usuario
+                    primaryKeyName: pk_permissao_grupo_usuario
+      
+      changes:
+        - addPrimaryKey:
+            tableName: permissao_grupo_usuario
+            columnNames: id_permissao, id_grupo, id_usuario
+            constraintName: pk_permissao_grupo_usuario
+      
+      rollback: 
+        - dropPrimaryKey:
+            tableName: permissao_grupo_usuario
+            constraintName: pk_permissao_grupo_usuario
+                
+  - changeSet:
+      id: create-permissao_usuario-table
+      author: lucas-10101
+      
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-permissoes-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - changeSetExecuted:
+                id: create-usuarios-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - not:
+                - tableExists:
+                    tableName: permissao_usuario
+      changes:
+        - createTable:
+            tableName: permissao_usuario
+            columns:
+              - column:
+                  name: id_permissao
+                  type: int
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: permissoes
+                    foreignKeyName: fk_permissao_usuario_permissoes
+              - column:
+                  name: id_usuario
+                  type: int
+                  constraints:
+                    nullable: false
+                    referencedColumnNames: id
+                    referencedTableName: usuarios
+                    foreignKeyName: fk_permissao_usuario_usuarios
+      
+      rollback: 
+        - dropTable:
+            tableName: permissao_usuario
+                    
+  - changeSet:
+      id: create-permissao_usuario-table-constraints
+      author: lucas-10101
+      
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-permissao_usuario-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+            - tableExists:
+                tableName: permissao_usuario
+            - not:
+                - primaryKeyExists:
+                    tableName: permissao_usuario
+                    primaryKeyName: pk_permissao_usuario
+      
+      changes:
+        - addPrimaryKey:
+            tableName: permissao_usuario
+            columnNames: id_permissao, id_usuario
+            constraintName: pk_permissao_usuario
+      
+      rollback: 
+        - dropPrimaryKey:
+            tableName: permissao_usuario
+            constraintName: pk_permissao_usuario
+            
+  - changeSet: # adicionar pré condition para todos os changesets anteriores
+      id: db-start-end
+      author: lucas-10101
+      
+      preConditions:
+        - and:
+            - changeSetExecuted:
+                id: create-locatarios-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-usuarios-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-grupos-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-grupos-table-constraints
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-permissoes-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-grupo_usuario-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-grupo_usuario-table-constraints
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-permissao_grupo-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-permissao_grupo-table-constraints
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-permissao_grupo_usuario-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-permissao_grupo_usuario-table-constraints
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-permissao_usuario-table
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+                
+            - changeSetExecuted:
+                id: create-permissao_usuario-table-constraints
+                author: lucas-10101
+                changeLogFile: db/changelog/db.create-tables.changelog.yaml
+      changes:
+        - tagDatabase:
+            tag: db-start-end

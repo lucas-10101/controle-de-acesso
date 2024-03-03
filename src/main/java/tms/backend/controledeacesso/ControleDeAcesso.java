@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MicroservicoDeControleDeAcessoApplication {
+public class ControleDeAcesso {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MicroservicoDeControleDeAcessoApplication.class, args);
+		SpringApplication.run(ControleDeAcesso.class, args);
 	}
 
 }
