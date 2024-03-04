@@ -65,7 +65,7 @@ public class KeycloakIdentityProvider implements IdentityProvider {
         return parts[parts.length - 1];
     }
 
-    protected Keycloak getInstance() {
+    protected Keycloak getInstanceode() {
         return KeycloakBuilder.builder()
                 .realm(getRealmName())
                 .clientId(clientId)

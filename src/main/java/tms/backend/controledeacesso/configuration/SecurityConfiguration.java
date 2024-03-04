@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
 
     @Value("${spring.profiles.active}")
@@ -36,6 +38,10 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(authorizeHttpRequests -> {
             authorizeHttpRequests.requestMatchers(HttpMethod.POST, "/auth/token").permitAll();
             authorizeHttpRequests.anyRequest().fullyAuthenticated();
+        });
+
+        http.oauth2ResourceServer(oauth2ResourceServer -> {
+            oauth2ResourceServer.jwt(Customizer.withDefaults());
         });
 
         return http.build();

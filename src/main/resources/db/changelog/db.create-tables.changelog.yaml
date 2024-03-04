@@ -26,7 +26,7 @@ databaseChangeLog:
                   name: id
                   type: int
                   autoIncrement: true
-                  startWith: 0
+                  startWith: 1
                   incrementBy: 1
                   constraints:
                     primaryKey: true
@@ -79,7 +79,7 @@ databaseChangeLog:
                   name: id
                   type: int
                   autoIncrement: true
-                  startWith: 0
+                  startWith: 1
                   incrementBy: 1
                   constraints:
                     primaryKey: true
@@ -127,7 +127,7 @@ databaseChangeLog:
                   name: id
                   type: bigint
                   autoIncrement: true
-                  startWith: 0
+                  startWith: 1
                   incrementBy: 1
                   constraints:
                     primaryKey: true
@@ -193,7 +193,7 @@ databaseChangeLog:
                   name: id
                   type: int
                   autoIncrement: true
-                  startWith: 0
+                  startWith: 1
                   incrementBy: 1
                   constraints:
                     primaryKey: true
@@ -205,6 +205,13 @@ databaseChangeLog:
                     nullable: false
                     unique: true
                     uniqueConstraintName: un_nome_permissoes
+              - column:
+                  name: funcao
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: un_funcao_permissoes
       
       rollback: 
         - dropTable:
