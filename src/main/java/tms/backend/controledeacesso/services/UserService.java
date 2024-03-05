@@ -7,16 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tms.backend.controledeacesso.data.entities.GrupoUsuario;
-import tms.backend.controledeacesso.data.entities.PermissaoGrupoUsuario;
-import tms.backend.controledeacesso.data.entities.PermissaoUsuario;
-import tms.backend.controledeacesso.data.entities.Usuario;
-import tms.backend.controledeacesso.data.jpa.GrupoRepository;
-import tms.backend.controledeacesso.data.jpa.GrupoUsuarioRepository;
-import tms.backend.controledeacesso.data.jpa.PermissaoGrupoUsuarioRepository;
-import tms.backend.controledeacesso.data.jpa.PermissaoRepository;
-import tms.backend.controledeacesso.data.jpa.PermissaoUsuarioRepository;
-import tms.backend.controledeacesso.data.jpa.UsuarioRepository;
+import tms.backend.controledeacesso.data.entities.User;
+import tms.backend.controledeacesso.data.entities.UserGroup;
+import tms.backend.controledeacesso.data.entities.UserGroupRole;
+import tms.backend.controledeacesso.data.entities.UserRole;
+import tms.backend.controledeacesso.data.jpa.GroupRepository;
+import tms.backend.controledeacesso.data.jpa.RoleRepository;
+import tms.backend.controledeacesso.data.jpa.UserGroupRepository;
+import tms.backend.controledeacesso.data.jpa.UserGroupRoleRepository;
+import tms.backend.controledeacesso.data.jpa.UserRepository;
+import tms.backend.controledeacesso.data.jpa.UserRoleRepository;
 import tms.backend.controledeacesso.data.models.dto.GrupoDto;
 import tms.backend.controledeacesso.data.models.dto.PermissaoDto;
 import tms.backend.controledeacesso.data.models.dto.UsuarioDto;
@@ -26,62 +26,62 @@ import tms.backend.controledeacesso.data.models.exceptions.ResourceNotFoundExcep
 public class UserService {
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private UserRepository usuarioRepository;
 
     @Autowired
-    private GrupoUsuarioRepository grupoUsuarioRepository;
+    private UserGroupRepository grupoUsuarioRepository;
 
     @Autowired
-    private GrupoRepository grupoRepository;
+    private GroupRepository grupoRepository;
 
     @Autowired
-    private PermissaoRepository permissaoRepository;
+    private RoleRepository permissaoRepository;
 
     @Autowired
-    private PermissaoUsuarioRepository permissaoUsuarioRepository;
+    private UserRoleRepository permissaoUsuarioRepository;
 
     @Autowired
-    private PermissaoGrupoUsuarioRepository permissaoGrupoUsuarioRepository;
+    private UserGroupRoleRepository permissaoGrupoUsuarioRepository;
 
     @Transactional(readOnly = true)
     public UsuarioDto getUser(Integer id) {
 
-        Usuario user = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(Usuario.class, id));
+        User user = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, id));
 
         UsuarioDto userDto = new UsuarioDto();
         userDto.setId(user.getId());
         userDto.setEmail(user.getEmail());
 
-        Collection<GrupoUsuario> groups = grupoUsuarioRepository.findByIdUsuario(user);
-        Collection<PermissaoUsuario> roles = permissaoUsuarioRepository.findByIdUsuario(user);
-        Collection<PermissaoGrupoUsuario> groupRoles = permissaoGrupoUsuarioRepository.findByIdUsuario(user);
+        Collection<UserGroup> groups = grupoUsuarioRepository.findByIdUser(user);
+        Collection<UserRole> roles = permissaoUsuarioRepository.findByIdUser(user);
+        Collection<UserGroupRole> groupRoles = permissaoGrupoUsuarioRepository.findByIdUser(user);
 
         // Lazy load cache
         permissaoRepository.findAll();
-        var groupIds = groups.stream().map(userGroups -> userGroups.getId().getGrupo().getId()).collect(Collectors.toList());
+        var groupIds = groups.stream().map(userGroups -> userGroups.getId().getGroup().getId()).collect(Collectors.toList());
         grupoRepository.findAllById(groupIds);
 
-        roles.stream().map(userRole -> userRole.getId().getPermissao()).forEach(role -> {
+        roles.stream().map(userRole -> userRole.getId().getRole()).forEach(role -> {
             PermissaoDto dto = new PermissaoDto();
             dto.setId(role.getId());
-            dto.setNome(role.getNome());
+            dto.setNome(role.getName());
 
             userDto.getPermissoes().add(dto);
         });
 
-        groups.stream().map(userGroup -> userGroup.getId().getGrupo()).forEach(group -> {
+        groups.stream().map(userGroup -> userGroup.getId().getGroup()).forEach(group -> {
 
             GrupoDto dto = new GrupoDto();
             dto.setId(group.getId());
-            dto.setNome(group.getNome());
+            dto.setNome(group.getName());
 
-            var groupRoleList = groupRoles.stream().map(roleByGroup -> roleByGroup.getId().getPermissaoGrupoPk())
-                    .filter(groupRole -> groupRole.getGrupo().getId() == group.getId()).map(role -> {
+            var groupRoleList = groupRoles.stream().map(roleByGroup -> roleByGroup.getId().getGroupRoleId())
+                    .filter(groupRole -> groupRole.getGroup().getId() == group.getId()).map(role -> {
 
                         PermissaoDto roleDto = new PermissaoDto();
-                        roleDto.setId(role.getPermissao().getId());
-                        roleDto.setNome(role.getPermissao().getNome());
+                        roleDto.setId(role.getRole().getId());
+                        roleDto.setNome(role.getRole().getName());
 
                         return roleDto;
                     }).collect(Collectors.toList());

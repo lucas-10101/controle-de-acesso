@@ -13,19 +13,19 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "usuarios")
-public class Usuario {
+@Table(name = "groups")
+public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", insertable = false, updatable = false)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "email", length = 320, nullable = false, unique = true)
-    private String email;
+    @Column(name = "name", length = 64, nullable = false)
+    private String name;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_locatario", nullable = false)
-    private Locatario locatario;
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private Tenant tenant;
 
 }

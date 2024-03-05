@@ -13,24 +13,24 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "permissao_usuario")
-public class PermissaoUsuario {
+@Table(name = "group_roles")
+public class GroupRole {
 
     @EmbeddedId
-    private PermissaoUsuarioPk id;
+    private GroupRolePk id;
 
     @Data
     @Embeddable
-    public static class PermissaoUsuarioPk implements Serializable {
+    public static class GroupRolePk implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
         @ManyToOne(optional = false, fetch = FetchType.LAZY)
-        @JoinColumn(name = "id_permissao", nullable = false)
-        private Permissao permissao;
+        @JoinColumn(name = "role_id", nullable = false)
+        private Role role;
 
         @ManyToOne(optional = false, fetch = FetchType.LAZY)
-        @JoinColumn(name = "id_usuario", nullable = false)
-        private Usuario usuario;
+        @JoinColumn(name = "group_id", nullable = false)
+        private Group group;
     }
 }

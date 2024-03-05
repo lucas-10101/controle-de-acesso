@@ -3,7 +3,6 @@ package tms.backend.controledeacesso.data.entities;
 import java.io.Serializable;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,27 +10,27 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
-import tms.backend.controledeacesso.data.entities.PermissaoGrupo.PermissaoGrupoPk;
 
 @Data
 @Entity
-@Table(name = "permissao_grupo_usuario")
-public class PermissaoGrupoUsuario {
+@Table(name = "user_roles")
+public class UserRole {
 
     @EmbeddedId
-    private PermissaoGrupoUsuarioPk id;
+    private UserRolePk id;
 
     @Data
     @Embeddable
-    public static class PermissaoGrupoUsuarioPk implements Serializable {
+    public static class UserRolePk implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        @Embedded
-        private PermissaoGrupoPk permissaoGrupoPk;
+        @ManyToOne(optional = false, fetch = FetchType.LAZY)
+        @JoinColumn(name = "role_id", nullable = false)
+        private Role role;
 
         @ManyToOne(optional = false, fetch = FetchType.LAZY)
-        @JoinColumn(name = "id_usuario", nullable = false)
-        private Usuario usuario;
+        @JoinColumn(name = "user_id", nullable = false)
+        private User user;
     }
 }

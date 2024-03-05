@@ -12,20 +12,20 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "permissoes")
-public class Permissao implements Serializable {
+@Table(name = "roles")
+public class Role implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(insertable = false, updatable = false)
+    @Column(name = "id", insertable = false, updatable = false)
     private Integer id;
 
-    @Column(length = 64, nullable = false)
-    private String nome;
+    @Column(name = "name", length = 64, nullable = false)
+    private String name;
 
-    @Column(length = 32, nullable = false)
-    private String funcao;
+    @Column(name = "role", length = 32, nullable = false)
+    private String role;
 
 }

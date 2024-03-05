@@ -3,9 +3,9 @@ package tms.backend.controledeacesso.data.jpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import tms.backend.controledeacesso.data.entities.Locatario;
+import tms.backend.controledeacesso.data.entities.Group;
 
 @Repository
-public interface LocatarioRepository extends JpaRepository<Locatario, Integer> {
+public interface GroupRepository extends JpaRepository<Group, Long> {
 
 }
